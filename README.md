@@ -18,12 +18,10 @@ I will set up Autotools later, but for now run:
 
 ## TODO
 * Transferring the image data to Tcl is a bit too slow.
-* Images should scale to fit the window while remaining aspect-ratio
-correct. There is a work-in-progress method that does not seem to work
-quite right if the image is larger than the window.
 * Toggle for linear/nearest?
 * Adding a zoom feature would be nice.
 * File name filters
 * Browse directories as galleries
 * Checkerboard pattern in transparent regions of an image
 * Basic processing functionality? EXIF data, rotation, crop, conversion?
+* Animated GIF support

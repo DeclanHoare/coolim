@@ -37,22 +37,10 @@ void updateLabel(void)
 		Magick::Image conv(orig);
 		
 		// Scale the image for the display area.
-		// FIXME: doesn't work for some images larger than the display
-		// area - there is probably a really dumb mistake somewhere here
-		int iw = conv.columns();
-		int ih = conv.rows();
-		int cw = winfo(width, ".label");
-		int ch = winfo(height, ".label");
-		double imscale = 1.0;
-		if ((iw - cw) > (ih - ch))
-			imscale = (double) cw / iw;
-		else
-			imscale = (double) ch / ih;
-		iw *= imscale;
-		ih *= imscale;
-		Magick::Geometry resize(iw, ih);
+		// ImageMagick will figure out the correct aspect ratio.
+		Magick::Geometry resize((int) winfo(width, ".label"), (int) winfo(height, ".label"));
 		conv.scale(resize);
-		".photo" << configure() -width(iw) -height(ih);
+		".photo" << configure() -width(conv.columns()) -height(conv.rows());
 		
 		// Convert to PNG and transfer into the Tcl environment using
 		// Base64. There is probably a much faster way to do this, FIXME
@@ -63,8 +51,9 @@ void updateLabel(void)
 		boost::interprocess::bufferstream instr((char*) imdata.data(), imdata.length());
 		std::stringstream outstr;
 		enc.encode(instr, outstr);
-		Tk::eval("set outstr \"" + outstr.str() + "\"");
-		Tk::eval(".photo configure -data $outstr");
+		std::string newdata = outstr.str();
+		Tk::LinkHandle<std::string> tkdata(newdata);
+		Tk::eval(".photo configure -data $" + tkdata.get());
 		".label" << configure() -image(".photo"); 
 	}
 }

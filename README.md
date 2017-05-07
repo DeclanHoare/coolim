@@ -11,8 +11,16 @@ JPEG-2000 (JP2).
 
 ## Building
 
-I will set up Autotools later, but for now run:
-`g++ coolim.cpp -o coolim $(pkg-config cpptk Magick++ --cflags --libs) -lb64`
+Run
+
+```
+autoreconf -i
+./configure
+make
+```
+
+to build the program. You can also run `make install` as root to install
+it system-wide.
 
 ## TODO
 * Zoom feature

@@ -29,6 +29,7 @@
 using namespace Tk;
 
 Magick::Image orig;
+Magick::Geometry currsize;
 bool loaded = false;
 
 void updateLabel(void)
@@ -40,30 +41,36 @@ void updateLabel(void)
 		// Scale the image for the display area.
 		// ImageMagick will figure out the correct aspect ratio.
 		Magick::Geometry resize((int) winfo(width, ".label"), (int) winfo(height, ".label"));
-		conv.scale(resize);
-		".photo" << configure() -width(conv.columns()) -height(conv.rows());
-		
-		// Convert to PNG and transfer into the Tcl environment using
-		// Base64. There is probably a much faster way to do this, FIXME
-		Magick::Blob imdata;
-		conv.magick("PNG");
-		conv.write(&imdata);
-		base64::encoder enc;
-		boost::interprocess::bufferstream instr((char*) imdata.data(), imdata.length());
-		std::stringstream outstr;
-		enc.encode(instr, outstr);
-		std::string newdata = outstr.str();
-		boost::erase_all(newdata, "\n");
-		".photo" << put(newdata);
-		".label" << configure() -image(".photo"); 
+		if (resize != currsize)
+		{
+			conv.sample(resize);
+			
+			// Encode in Base64.
+			Magick::Blob imdata;
+			conv.write(&imdata);
+			base64::encoder enc;
+			boost::interprocess::bufferstream instr((char*) imdata.data(), imdata.length());
+			std::stringstream outstr;
+			enc.encode(instr, outstr);
+			std::string newdata = outstr.str();
+			boost::erase_all(newdata, "\n");
+			
+			// Put the data onto the Tk PhotoImage.
+			".photo" << configure() -width(conv.columns()) -height(conv.rows());
+			".photo" << put(newdata);
+			currsize = resize;
+		}
 	}
 }
 
 void loadFile(std::string filename)
 {
 	orig.read(filename);
+	orig.magick("PNG");
+	orig.defineValue("PNG", "compression-level", "0");
 	loaded = true;
 	wm(title, ".", filename + " - CoolIm");
+	currsize = Magick::Geometry();
 	updateLabel();
 }
 
@@ -92,10 +99,11 @@ int main(int argc, char** argv)
 	".mbar.file.m" << add(command) -menulabel("Open") -command(openImage);
 	".mbar.file.m" << add(command) -menulabel("Exit") -command(std::string("exit"));
 	
-	images(create, photo, ".photo");
-	
 	label(".label");
 	pack(".label") -fill(both) -expand(true);
+	
+	images(create, photo, ".photo");
+	".label" << configure() -image(".photo");
 	
 	if (argc > 1)
 		loadFile(argv[1]);

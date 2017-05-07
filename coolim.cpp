@@ -18,6 +18,7 @@
 #include <sstream>
 
 #include <boost/interprocess/streams/bufferstream.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <cpptk.h>
 #include <Magick++.h>
@@ -52,8 +53,8 @@ void updateLabel(void)
 		std::stringstream outstr;
 		enc.encode(instr, outstr);
 		std::string newdata = outstr.str();
-		Tk::LinkHandle<std::string> tkdata(newdata);
-		Tk::eval(".photo configure -data $" + tkdata.get());
+		boost::erase_all(newdata, "\n");
+		".photo" << put(newdata);
 		".label" << configure() -image(".photo"); 
 	}
 }

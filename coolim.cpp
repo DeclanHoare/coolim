@@ -59,16 +59,20 @@ void updateLabel(void)
 	}
 }
 
+void loadFile(std::string filename)
+{
+	orig.read(filename);
+	loaded = true;
+	wm(title, ".", filename + " - CoolIm");
+	updateLabel();
+}
+
 void openImage(void)
 {
 	// TODO: add filename filters
 	std::string filename = tk_getOpenFile();
 	if (!filename.empty())
-	{
-		orig.read(filename);
-		loaded = true;
-		updateLabel();
-	}
+		loadFile(filename);
 }
 
 int main(int argc, char** argv)
@@ -94,10 +98,7 @@ int main(int argc, char** argv)
 	pack(".label") -fill(both) -expand(true);
 	
 	if (argc > 1)
-	{
-		orig.read(argv[1]);
-		loaded = true;
-	}
+		loadFile(argv[1]);
 	
 	Tk::runEventLoop();
 	return 0;

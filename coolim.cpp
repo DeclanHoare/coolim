@@ -88,6 +88,7 @@ int main(int argc, char** argv)
 	Magick::InitializeMagick(argv[0]);
 	
 	wm(title, ".", "CoolIm");
+	wm(geometry, ".", "800x600");
 	bind(".", "<Configure>", updateLabel);
 	frame(".mbar") -borderwidth(1) -relief(raised);
 	pack(".mbar") -fill(x);
